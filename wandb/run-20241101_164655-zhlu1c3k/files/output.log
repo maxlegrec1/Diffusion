@@ -1,0 +1,28 @@
+
+Epoch : 1/1000, Loss : 1.1584064960479736
+Epoch : 2/1000, Loss : 1.0774836540222168
+Epoch : 3/1000, Loss : 1.0542716979980469
+Epoch : 4/1000, Loss : 0.9781284332275391
+Epoch : 5/1000, Loss : 0.930962085723877
+Epoch : 6/1000, Loss : 0.9683971405029297
+Epoch : 7/1000, Loss : 0.9592125415802002
+Epoch : 8/1000, Loss : 0.8595513105392456
+Epoch : 9/1000, Loss : 0.913408637046814
+Epoch : 10/1000, Loss : 0.9185463190078735
+Epoch : 11/1000, Loss : 0.8362921476364136
+Epoch : 12/1000, Loss : 0.8173381686210632
+Epoch : 13/1000, Loss : 0.7805344462394714
+Epoch : 14/1000, Loss : 0.8005090951919556
+Epoch : 15/1000, Loss : 0.7412909269332886
+Epoch : 16/1000, Loss : 0.8596479296684265
+Epoch : 17/1000, Loss : 0.7106732726097107
+Epoch : 18/1000, Loss : 0.7645823359489441
+Epoch : 19/1000, Loss : 0.676235556602478
+Epoch : 20/1000, Loss : 0.707664966583252
+Epoch : 21/1000, Loss : 0.6588362455368042
+Traceback (most recent call last):
+  File ".\main.py", line 46, in <module>
+    loss = train_one_epoch(model, opt, ds, batch_size, scheduler, criterion)
+  File ".\main.py", line 23, in train_one_epoch
+    loss_epoch.append(l.item())
+KeyboardInterrupt

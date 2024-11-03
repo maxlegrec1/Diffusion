@@ -1,0 +1,14 @@
+
+torch.Size([2, 1, 128])
+Traceback (most recent call last):
+  File ".\main.py", line 47, in <module>
+    loss = train_one_epoch(model, opt, ds, batch_size, scheduler, criterion)
+  File ".\main.py", line 17, in train_one_epoch
+    pred = model(noised, Ts)
+  File "C:\Users\maxti\miniconda3\envs\pytorch\lib\site-packages\torch\nn\modules\module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\maxti\miniconda3\envs\pytorch\lib\site-packages\torch\nn\modules\module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\maxti\Documents\MiniProjects\DiffusionPerso\models\unet.py", line 157, in forward
+    x_t = x_t + self.linears_down[i](self.pe).view(
+RuntimeError: shape '[2, 128, 1, 1]' is invalid for input of size 128000

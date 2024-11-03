@@ -1,0 +1,25 @@
+cuda:0 cuda:0 tensor([[ 0.0000e+00,  1.0000e+00,  0.0000e+00,  ...,  1.0000e+00,
+          0.0000e+00,  1.0000e+00],
+        [ 8.4147e-01,  5.4030e-01,  7.6172e-01,  ...,  1.0000e+00,
+          1.1548e-04,  1.0000e+00],
+        [ 9.0930e-01, -4.1615e-01,  9.8705e-01,  ...,  1.0000e+00,
+          2.3096e-04,  1.0000e+00],
+        ...,
+        [-8.9797e-01, -4.4006e-01,  5.4097e-01,  ...,  9.9117e-01,
+          1.1488e-01,  9.9338e-01],
+        [-8.5547e-01,  5.1785e-01, -2.9015e-01,  ...,  9.9116e-01,
+          1.1499e-01,  9.9337e-01],
+        [-2.6461e-02,  9.9965e-01, -9.1694e-01,  ...,  9.9114e-01,
+          1.1511e-01,  9.9335e-01]])
+Traceback (most recent call last):
+  File ".\main.py", line 47, in <module>
+    loss = train_one_epoch(model, opt, ds, batch_size, scheduler, criterion)
+  File ".\main.py", line 17, in train_one_epoch
+    pred = model(noised, Ts)
+  File "C:\Users\maxti\miniconda3\envs\pytorch\lib\site-packages\torch\nn\modules\module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\maxti\miniconda3\envs\pytorch\lib\site-packages\torch\nn\modules\module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\maxti\Documents\MiniProjects\DiffusionPerso\models\unet.py", line 153, in forward
+    Ts_embed = torch.gather(self.pe, dim=0, index=Ts)
+RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cpu and cuda:0! (when checking argument for argument index in method wrapper_CUDA_gather)

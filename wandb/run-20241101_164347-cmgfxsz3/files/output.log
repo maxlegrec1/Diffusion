@@ -1,0 +1,11 @@
+
+Epoch : 1/1000, Loss : 1.1003108024597168
+Epoch : 2/1000, Loss : 1.0584410429000854
+Epoch : 3/1000, Loss : 0.988554835319519
+Epoch : 4/1000, Loss : 0.9738675355911255
+Traceback (most recent call last):
+  File ".\main.py", line 46, in <module>
+    loss = train_one_epoch(model, opt, ds, batch_size, scheduler, criterion)
+  File ".\main.py", line 23, in train_one_epoch
+    loss_epoch.append(l.item())
+KeyboardInterrupt
