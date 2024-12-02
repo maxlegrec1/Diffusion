@@ -4,67 +4,38 @@ import random
 import numpy as np
 import torch
 import torchvision
+import torchvision.transforms.v2 as v2
 import torchvision.transforms.functional as F
 from torchvision import transforms
 
 
 class Transform(torch.nn.Module):
-    def __init__(self):
+    def __init__(self,img_size = 256):
         super().__init__()
-
-    def forward(self, x):
-        rotation_angle = 20 * random.random() - 10
-        x = transforms.functional.rotate(x, rotation_angle)
-
-        flip = random.random() >= 0.5
-
-        if flip:
-            x = transforms.functional.hflip(x)
-
-        alpha = random.uniform(0, 50)  # Controls the intensity of the transform
-        sigma = random.uniform(3, 7)  # Controls the smoothness of the transform
-        sigma = [sigma, sigma]
-        alpha = [alpha, alpha]
-        size = list(x.shape[-2:])
-        dx = torch.rand([1, 1] + size) * 2 - 1
-        if sigma[0] > 0.0:
-            kx = int(8 * sigma[0] + 1)
-            # if kernel size is even we have to make it odd
-            if kx % 2 == 0:
-                kx += 1
-            dx = F.gaussian_blur(dx, [kx, kx], sigma)
-        dx = dx * alpha[0] / size[0]
-
-        dy = torch.rand([1, 1] + size) * 2 - 1
-        if sigma[1] > 0.0:
-            ky = int(8 * sigma[1] + 1)
-            # if kernel size is even we have to make it odd
-            if ky % 2 == 0:
-                ky += 1
-            dy = F.gaussian_blur(dy, [ky, ky], sigma)
-        dy = dy * alpha[1] / size[1]
-        displacement = torch.concat([dx, dy], 1).permute([0, 2, 3, 1])  # 1 x H x W x 2
-
-        x = F.elastic_transform(x, displacement=displacement, fill=0)
-        transform_global = transforms.Compose(
-            [
-                transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
-                transforms.RandomRotation(
+        self.transform_global = transforms.Compose(
+            [   v2.ElasticTransform(alpha = random.uniform(0, 50), sigma = random.uniform(3, 7)),
+                v2.RandomHorizontalFlip(),  # Randomly flip the image horizontally
+                v2.RandomRotation(
                     10
                 ),  # Randomly rotate the image by up to 10 degrees
-                transforms.ColorJitter(
+                v2.ColorJitter(
                     brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1
                 ),
+                v2.Resize((img_size,img_size))
             ]
         )
-        x = transform_global(x)
+    def forward(self, x):
+        
+
+
+        x = self.transform_global(x)
 
         return x
 
 
 class Dataset:
 
-    def __init__(self, dataset_path, dir_of_dirs=True, extension="png"):
+    def __init__(self, dataset_path, dir_of_dirs=True, extension="jpg",size = 256):
         self.path = dataset_path
         if dir_of_dirs:
             self.images_path = []
@@ -80,7 +51,8 @@ class Dataset:
             ]
 
         self.img_size = torchvision.io.read_image(self.images_path[0]).shape[1:]
-
+        self.info()
+        self.transform = Transform(size)
     def info(self):
 
         print(f"Dataset length : {len(self.images_path)}")
@@ -98,7 +70,7 @@ class Dataset:
         return (batch - 127.5) / 127.5
 
     def create_gen(
-        self, batch_size=32, device="cuda", transform=Transform(), loop_when_finish=True
+        self, batch_size=32, device="cuda", transform=None, loop_when_finish=True
     ):
         """
         Creates a generator that yields batches of images.
@@ -112,6 +84,8 @@ class Dataset:
         Yields:
             torch.Tensor: Batch of images of shape [batch_size, channels, height, width]
         """
+        if transform == None:
+            transform = self.transform
         current_idx = 0
         num_images = len(self.images_path)
         perm = np.random.permutation(num_images)
@@ -130,8 +104,6 @@ class Dataset:
                         # If batch is not empty, yield it before stopping
                         if batch:
                             final_batch = torch.stack(batch).to(device)
-                            if transform:
-                                final_batch = transform(final_batch)
                             final_batch = self.normalize_images(final_batch)
                             yield final_batch
                         return
@@ -140,16 +112,13 @@ class Dataset:
                 image = torchvision.io.read_image(self.images_path[perm[current_idx]])
 
                 # Add to batch
-                batch.append(image)
+                batch.append(transform(image))
 
                 current_idx += 1
 
             # Convert batch to tensor
             batch = torch.stack(batch).to(device)
-
             # Apply transform if provided
-            if transform:
-                batch = transform(batch)
 
             # Normalize the batch
             batch = self.normalize_images(batch)
@@ -158,16 +127,16 @@ class Dataset:
 
 
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+    dataset_path = "datasets/afhq/train"
 
-    dataset_path = "datasets/afhq"
-
-    ds = Dataset(dataset_path)
+    ds = Dataset(dataset_path,size = 128)
     ds.info()
-    gen = ds.create_gen(batch_size=2, loop_when_finish=True)
-
-    i = 0
-    for batch in gen:
-        print(i)
-        i += 1
-
-    print(i)
+    gen = ds.create_gen(batch_size=16, loop_when_finish=False)
+    num_img_show = 10
+    for i in range(num_img_show):
+        batch = next(gen)
+        img = (batch[0].permute(1,2,0).cpu().numpy() + 1 )/2
+        plt.imshow(img)
+        plt.show()
+    exit()

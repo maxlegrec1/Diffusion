@@ -1,3 +1,9 @@
-datasets/*
+data/*
 *.pt
 wandb/*
+*.png
+*.pyc
+test_antoine.py
+test.py
+antoine.py
+denoiser.py

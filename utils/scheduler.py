@@ -30,10 +30,13 @@ class Scheduler(torch.nn.Module):
     def noise(self, x, betas):
         noise = torch.randn_like(x)
         betas = betas.view(-1, 1, 1, 1).expand(x.shape)
-        return torch.sqrt(1 - betas) * x + betas * noise, noise
+        return torch.sqrt(1 - betas) * x + torch.sqrt(betas) * noise, noise
 
-    def get_blurred(self, x, return_steps=False):
-        steps = torch.randint(0, self.T, size=(x.shape[0], 1), device=self.device)
+    def get_blurred(self, x, return_steps=False, t = None):
+        if t!= None:
+            steps = torch.from_numpy(np.array([t])).to(self.device).view(1,1).expand(x.shape[0],1)
+        else:
+            steps = torch.randint(0, self.T, size=(x.shape[0], 1), device=self.device)
         betas_bar = torch.gather(self.betas_bar, 0, steps)
         noised, noise = self.noise(x, betas_bar)
         if return_steps:
@@ -45,14 +48,18 @@ class Scheduler(torch.nn.Module):
 if __name__ == "__main__":
     from imgen import Dataset
 
-    device = "cuda"
-    ds = Dataset("datasets/afhq")
-    gen = ds.create_gen(batch_size=32, device=device)
-    scheduler = Scheduler()
+    device = "cuda:1"
+    ds = Dataset("datasets/afhq/train")
+    gen = ds.create_gen(batch_size=8, device=device)
+    scheduler = Scheduler(device = device)
     imgs = next(gen)
     print(imgs.shape)
     noised, noise, Ts = scheduler.get_blurred(imgs, return_steps=True)
     print(Ts)
     noised = (noised + 1) / 2
-    plt.imshow(noised[0].cpu().transpose(0, 2).transpose(0, 1))
+    imgs = (imgs +1) /2
+    plt.imshow(imgs[0].cpu().permute(1,2,0))
     plt.show()
+    plt.imshow(noised[0].cpu().permute(1,2,0))
+    plt.show()
+   
